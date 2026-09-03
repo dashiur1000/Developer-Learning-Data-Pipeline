@@ -1,7 +1,9 @@
+import logging
 import os
 import json
 from confluent_kafka import Consumer, Producer
 from Cleaning_and_conversions import process_record
+import Logging
 
 
 bootstrap_servers = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092')
@@ -24,12 +26,15 @@ producer = Producer(producer_conf)
 
 def start_processing():
     message_count = 0
+    logging.info("Starting the processing")
     try:
         while True:
             msg = consumer.poll(1.0)
             if msg is None:
+                logging.warning("The message is None")
                 continue
             if msg.error():
+                logging.error(f"Consumer error: {msg.error()}")
                 print(f"Consumer error: {msg.error()}")
                 continue
 
@@ -38,17 +43,21 @@ def start_processing():
 
             processed_record = process_record(raw_record)
 
+            logging.info("Defines a topic")
             producer.produce(
                 output_topic,
                 value=json.dumps(processed_record).encode("utf-8")
             )
             producer.poll(0)
             message_count += 1
+            logging.info(f"Processed and sent message number: {message_count}")
             print(f"Processed and sent message number: {message_count}")
 
     except KeyboardInterrupt:
+        logging.error("Stopping processor")
         print("Stopping processor")
     finally:
+        logging.info("Consumer closure")
         consumer.close()
         producer.flush()
 
