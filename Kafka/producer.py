@@ -14,6 +14,7 @@ def delivery_report(err, msg):
         print(f'Message delivered to {msg.topic()}')
 
 def produce_csv_to_kafka(csv_file_path, topic_name):
+    count = 0
     with open(csv_file_path, "r", encoding="utf-8") as file:
         reader = csv.DictReader(file)
 
@@ -26,23 +27,9 @@ def produce_csv_to_kafka(csv_file_path, topic_name):
                 callback=delivery_report
             )
             producer.poll(0)
+            count += 1
         producer.flush()
-
-def ensure_topic_exists(bootstrap_servers, topic_name):
-    admin_client = AdminClient({'bootstrap.servers': bootstrap_servers})
-    metadata = admin_client.list_topics(timeout=5)
-
-    if topic_name not in metadata.topics:
-        new_topic = NewTopic(topic=topic_name, num_partitions=1, replication_factor=1)
-        fs = admin_client.create_topics([new_topic])
-        for topic, future in fs.items():
-            try:
-                future.result()
-                print(f"Topic '{topic}' created successfully.")
-            except Exception as e:
-                print(f"Failed to create topic '{topic}': {e}")
-    else:
-        print(f"Topic '{topic_name}' already exists.")
+    print(f"{count}")
 
 
 
@@ -54,7 +41,6 @@ if __name__ == "__main__":
 
     producer = Producer(conf)
     topic_name = "raw-topic"
-    # ensure_topic_exists(bootstrap_servers, topic_name)
     parent_dir = Path.cwd().parent
     file_name = "developer_ai_learning_raw.csv"
     csv_file_path = parent_dir / "Data" / file_name
