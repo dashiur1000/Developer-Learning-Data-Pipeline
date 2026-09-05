@@ -1,0 +1,17 @@
+{
+  "ResponseId": "49191",
+  "Age": "18-24 years old",
+  "YearsCode": 6,
+  "DevType": "Student",
+  "LearnCodeChoose": "Yes, I am not new to coding but am learning new coding techniques or programming language",
+  "LearnCode": [ "Online Courses or Certification (includes all media types)", "Other online resources (e.g. standard search, forum, online community)", "Books / Physical media", "Videos (not associated with specific online course or certification)", "Stack Overflow or Stack Exchange", "AI CodeGen tools or AI-enabled apps", "Blogs or podcasts" ],
+  "LearnCodeAI": "Yes, I learned how to use AI-enabled tools for my personal curiosity and/or hobbies",
+  "AILearnHow": "AI CodeGen tools or AI-enabled apps",
+  "AISelect": "",
+  "AIAcc": "",
+  "AISent": "",
+  "experienceLevel": "Experienced",
+  "usesDocumentation": false,
+  "usesAIForLearning": true,
+  "usesStackOverflow": true
+}

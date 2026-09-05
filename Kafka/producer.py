@@ -6,8 +6,9 @@ from confluent_kafka import Producer
 from pathlib import Path
 from confluent_kafka.admin import AdminClient, NewTopic
 import Logging
+import os
 
-bootstrap_servers = 'localhost:9092'
+bootstrap_servers = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'kafka:9092')
 conf = {
     'bootstrap.servers': bootstrap_servers
 }
@@ -44,9 +45,7 @@ def produce_csv_to_kafka(csv_file_path, topic_name):
 
 def main():
     topic_name = "raw-topic"
-    parent_dir = Path.cwd().parent
-    file_name = "developer_ai_learning_raw.csv"
-    csv_file_path = parent_dir / "Data" / file_name
+    csv_file_path = Path("/Data/developer_ai_learning_raw.csv")
     produce_csv_to_kafka(csv_file_path, topic_name)
 
 if __name__ == "__main__":
