@@ -53,3 +53,19 @@ services:
       - kafka
       - app
       - mongodb
+
+  mongo-api:
+    build:
+      context: ./AiFromMongoAPI
+      dockerfile: Dockerfile
+    container_name: mongo_api_service
+    restart: unless-stopped
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Surveys__ConnectionString=mongodb://mongodb:27017
+      - Surveys__DatabaseName=my-database
+      - Surveys__CollectionName=Surveys
+    depends_on:
+      - mongodb
