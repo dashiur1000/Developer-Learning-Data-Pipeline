@@ -1,25 +1,53 @@
-var builder = WebApplication.CreateBuilder(args);
+using AspConcumer.Service;
+using Confluent.Kafka;
+using consumer.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 
-// Add services to the container.
+namespace Consumer;
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+class Program
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    static async Task Main(string[] args)
+    {
+        var connectionString = "mongodb://db:27017";
+        var databaseName = "my-database";
+
+        var services = new ServiceCollection();
+
+        services.AddSingleton<IMongoClient>(new MongoClient(connectionString));
+        services.AddScoped(p => p.GetRequiredService<IMongoClient>().GetDatabase(databaseName));
+
+        services.AddScoped<DataProcessing>();
+        var serviceProvider = services.BuildServiceProvider();
+
+        var bootstrap = "kafka:9092";
+        var group = "vi-1";
+
+        var consumerConfig = new ConsumerConfig
+        {
+            GroupId = group,
+            BootstrapServers = bootstrap,
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            EnableAutoCommit = false
+        };
+
+        using var consumer = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
+        consumer.Subscribe("processed-topic");
+        while (true)
+        {
+            var result = consumer.Consume(TimeSpan.FromSeconds(20));
+            if (result == null)
+            {
+                continue;
+            }
+            using var scope = serviceProvider.CreateAsyncScope();
+            var processing = scope.ServiceProvider.GetRequiredService<DataProcessing>();
+            if (await processing.FromTopicToDb(result.Message.Value))
+            {
+                consumer.Commit(result);
+            }
+        }
+    }
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();

@@ -6,7 +6,7 @@ from Cleaning_and_conversions import process_record
 import Logging
 
 
-bootstrap_servers = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092')
+bootstrap_servers = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'kafka:9092')
 input_topic = os.getenv('INPUT_TOPIC', 'raw-topic')
 output_topic = os.getenv('OUTPUT_TOPIC', 'processed-topic')
 group_id = "processor-group-v2"

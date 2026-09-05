@@ -1,6 +1,5 @@
 import producer
 import Processor_Service
-import tiבme
 
 def main():
     producer.main()
